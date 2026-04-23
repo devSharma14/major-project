@@ -1,0 +1,17 @@
+<nodes>
+    <!-- Traffic light junctions -->
+    <node id="J1" x="0"   y="0"    type="traffic_light"/>
+    <node id="J2" x="200" y="0"    type="traffic_light"/>
+    <node id="J3" x="0"   y="-200" type="traffic_light"/>
+    <node id="J4" x="200" y="-200" type="traffic_light"/>
+
+    <!-- External entry / exit nodes -->
+    <node id="N1" x="0"   y="100"/>
+    <node id="N2" x="200" y="100"/>
+    <node id="S1" x="0"   y="-300"/>
+    <node id="S2" x="200" y="-300"/>
+    <node id="W1" x="-100" y="0"/>
+    <node id="W2" x="-100" y="-200"/>
+    <node id="E1" x="300"  y="0"/>
+    <node id="E2" x="300"  y="-200"/>
+</nodes>

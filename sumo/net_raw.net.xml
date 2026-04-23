@@ -1,0 +1,21 @@
+<net version="1.9">
+    <location netOffset="0,0" convBoundary="-100,-100,100,100"/>
+
+    <!-- Nodes -->
+    <node id="N" x="0" y="100" type="priority"/>
+    <node id="S" x="0" y="-100" type="priority"/>
+    <node id="E" x="100" y="0" type="priority"/>
+    <node id="W" x="-100" y="0" type="priority"/>
+    <node id="J" x="0" y="0" type="traffic_light"/>
+
+    <!-- Edges -->
+    <edge id="N2J" from="N" to="J" priority="1" numLanes="1" speed="13"/>
+    <edge id="S2J" from="S" to="J" priority="1" numLanes="1" speed="13"/>
+    <edge id="E2J" from="E" to="J" priority="1" numLanes="1" speed="13"/>
+    <edge id="W2J" from="W" to="J" priority="1" numLanes="1" speed="13"/>
+
+    <edge id="J2N" from="J" to="N" numLanes="1" speed="13"/>
+    <edge id="J2S" from="J" to="S" numLanes="1" speed="13"/>
+    <edge id="J2E" from="J" to="E" numLanes="1" speed="13"/>
+    <edge id="J2W" from="J" to="W" numLanes="1" speed="13"/>
+</net>

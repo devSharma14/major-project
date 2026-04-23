@@ -1,0 +1,23 @@
+<configuration>
+    <input>
+        <net-file value="net.net.xml"/>
+        <route-files value="routes.rou.xml"/>
+    </input>
+
+    <time>
+        <begin value="0"/>
+        <end value="2000"/>
+        <step-length value="1"/>
+    </time>
+
+    <processing>
+        <time-to-teleport value="900"/>
+        <time-to-teleport.highways value="-1"/>
+    </processing>
+
+    <report>
+        <verbose value="false"/>
+        <no-step-log value="true"/>
+        <no-warnings value="false"/>
+    </report>
+</configuration>

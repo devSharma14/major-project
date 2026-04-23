@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MARL Traffic Control Dashboard</title>
+  <meta name="description"
+        content="Real-time dashboard for Multi-Agent Reinforcement Learning traffic signal control. Monitor training progress, agent states, and performance comparisons across 4 intersections." />
+
+  <!-- Favicon -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚦</text></svg>" />
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="style.css" />
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+</head>
+
+<body>
+
+<!-- ╔══════════════════════════════════════════════════════╗
+     ║  NAVIGATION                                          ║
+     ╚══════════════════════════════════════════════════════╝ -->
+<nav id="nav" role="navigation" aria-label="Main navigation">
+  <div class="nav-logo">
+    <div class="logo-icon" aria-hidden="true">🚦</div>
+    <span>MARL Traffic&nbsp;Control</span>
+  </div>
+
+  <div class="nav-right">
+    <span class="status-badge" id="statusBadge" aria-live="polite">
+      <span class="dot"></span>
+      System Active
+    </span>
+    <span id="lastUpdated" style="font-size:0.72rem;color:var(--text-muted)"></span>
+    <button class="btn-ghost" id="btnRefresh" aria-label="Refresh dashboard data">⟳ Refresh</button>
+  </div>
+</nav>
+
+
+<!-- ╔══════════════════════════════════════════════════════╗
+     ║  HERO                                                ║
+     ╚══════════════════════════════════════════════════════╝ -->
+<section id="hero" aria-labelledby="heroTitle">
+  <div class="hero-tag">🤖 Multi-Agent Reinforcement Learning</div>
+  <h1 id="heroTitle">
+    Adaptive Traffic Signal<br />
+    <span class="grad">Control Dashboard</span>
+  </h1>
+  <p class="hero-sub">
+    4 cooperative Q-Learning agents managing a SUMO intersection network in real time —
+    minimizing queue lengths, waiting times, and teleportation events.
+  </p>
+</section>
+
+
+<!-- ╔══════════════════════════════════════════════════════╗
+     ║  MAIN CONTENT                                        ║
+     ╚══════════════════════════════════════════════════════╝ -->
+<main id="main" aria-label="Dashboard panels">
+
+  <!-- ── Section: Training Stats ──────────────────────── -->
+  <div class="section-label">📊 Training Overview</div>
+
+  <div class="metrics-row" role="region" aria-label="Training statistics">
+
+    <div class="metric-card" data-tip="Total training episodes completed">
+      <div class="metric-label">🎬 Episodes</div>
+      <div class="metric-value"><span id="statEpisodes" class="count-up">—</span></div>
+      <div class="metric-sub">Training iterations</div>
+    </div>
+
+    <div class="metric-card" data-tip="Best cumulative reward achieved">
+      <div class="metric-label">🏆 Best Reward</div>
+      <div class="metric-value"><span id="statBest" class="count-up">—</span></div>
+      <div class="metric-sub">Highest episode score</div>
+    </div>
+
+    <div class="metric-card" data-tip="Mean reward over all episodes">
+      <div class="metric-label">📈 Mean Reward</div>
+      <div class="metric-value"><span id="statMean" class="count-up">—</span></div>
+      <div class="metric-sub">All-episode average</div>
+      <div id="statTrend" class="metric-trend trend-up">—</div>
+    </div>
+
+    <div class="metric-card" data-tip="Mean reward over last 50 episodes">
+      <div class="metric-label">🔥 Recent Mean</div>
+      <div class="metric-value"><span id="statRecent" class="count-up">—</span></div>
+      <div class="metric-sub">Last 50 episodes</div>
+    </div>
+
+    <div class="metric-card" data-tip="Reward at the final training episode">
+      <div class="metric-label">🎯 Final Reward</div>
+      <div class="metric-value"><span id="statFinal" class="count-up">—</span></div>
+      <div class="metric-sub">Episode 1000</div>
+    </div>
+
+  </div><!-- /metrics-row -->
+
+
+  <!-- ── Section: Network + Agents ────────────────────── -->
+  <div class="section-label">🗺️ Intersection Network &amp; Agent Status</div>
+
+  <div class="row-two">
+
+    <!-- Intersection map -->
+    <div class="card" role="region" aria-label="Intersection network map">
+      <div class="card-header">
+        <div class="card-title">
+          <span class="icon">🗺️</span>
+          Live Network Map
+        </div>
+        <span class="card-badge badge-cyan">4 Junctions</span>
+      </div>
+      <div class="intersection-grid" id="intersectionGrid" aria-label="Intersection nodes">
+        <!-- Populated by JS -->
+        <div class="skeleton" style="height:140px;border-radius:var(--radius-md)"></div>
+        <div class="skeleton" style="height:140px;border-radius:var(--radius-md)"></div>
+        <div class="skeleton" style="height:140px;border-radius:var(--radius-md)"></div>
+        <div class="skeleton" style="height:140px;border-radius:var(--radius-md)"></div>
+      </div>
+    </div>
+
+    <!-- Agent status -->
+    <div class="card" role="region" aria-label="Q-Learning agent status">
+      <div class="card-header">
+        <div class="card-title">
+          <span class="icon">🤖</span>
+          Agent Status
+        </div>
+        <span class="card-badge badge-blue">Q-Learning</span>
+      </div>
+      <div class="agent-list" id="agentList" aria-label="Individual agent stats">
+        <!-- Populated by JS -->
+        <div class="skeleton" style="height:64px;border-radius:var(--radius-md)"></div>
+        <div class="skeleton" style="height:64px;border-radius:var(--radius-md)"></div>
+        <div class="skeleton" style="height:64px;border-radius:var(--radius-md)"></div>
+        <div class="skeleton" style="height:64px;border-radius:var(--radius-md)"></div>
+      </div>
+    </div>
+
+  </div><!-- /row-two -->
+
+
+  <!-- ── Section: Training Reward Chart ───────────────── -->
+  <div class="section-label">📉 Training Reward Curve</div>
+
+  <div class="card" role="region" aria-label="Training reward over episodes">
+    <div class="card-header">
+      <div class="card-title">
+        <span class="icon">📉</span>
+        MARL Training Reward Progress
+      </div>
+      <span class="card-badge badge-purple">1000 Episodes</span>
+    </div>
+    <div class="chart-container">
+      <canvas id="rewardChart" aria-label="Training reward line chart"></canvas>
+    </div>
+  </div>
+
+
+  <!-- ── Section: Policy Comparison + Hyperparams ─────── -->
+  <div class="section-label">⚖️ Policy Evaluation &amp; Configuration</div>
+
+  <div class="row-four">
+
+    <!-- Policy comparison bars -->
+    <div class="card" role="region" aria-label="Policy performance comparison">
+      <div class="card-header">
+        <div class="card-title">
+          <span class="icon">⚖️</span>
+          Policy Evaluation Comparison
+        </div>
+        <span class="card-badge badge-cyan">5 Eval Runs</span>
+      </div>
+      <div class="policy-bars" id="policyBars" aria-label="Policy comparison bars">
+        <div class="skeleton" style="height:70px;border-radius:var(--radius-sm)"></div>
+        <div class="skeleton" style="height:70px;border-radius:var(--radius-sm)"></div>
+        <div class="skeleton" style="height:70px;border-radius:var(--radius-sm)"></div>
+      </div>
+
+      <!-- Legend note -->
+      <p style="margin-top:1.2rem;font-size:0.75rem;color:var(--text-muted);
+                border-top:1px solid var(--border);padding-top:0.8rem;line-height:1.6">
+        <strong style="color:var(--accent)">Higher bar = better performance.</strong>
+        Bars normalised to range [worst → best] across all policies.
+        Reward values are negative (cumulative queue penalty) — closer to 0 is better.
+      </p>
+    </div>
+
+    <!-- Hyperparameters -->
+    <div class="card" role="region" aria-label="Agent hyperparameters">
+      <div class="card-header">
+        <div class="card-title">
+          <span class="icon">⚙️</span>
+          Hyperparameters
+        </div>
+        <span class="card-badge badge-purple">Q-Learning</span>
+      </div>
+      <div class="params-grid" id="paramsGrid" aria-label="Training hyperparameter values">
+        <div class="skeleton" style="height:54px;border-radius:var(--radius-sm)"></div>
+        <div class="skeleton" style="height:54px;border-radius:var(--radius-sm)"></div>
+        <div class="skeleton" style="height:54px;border-radius:var(--radius-sm)"></div>
+        <div class="skeleton" style="height:54px;border-radius:var(--radius-sm)"></div>
+        <div class="skeleton" style="height:54px;border-radius:var(--radius-sm)"></div>
+        <div class="skeleton" style="height:54px;border-radius:var(--radius-sm)"></div>
+      </div>
+    </div>
+
+  </div><!-- /row-four -->
+
+
+  <!-- ── Section: Traffic & SUMO config ───────────────── -->
+  <div class="section-label">🛣️ Simulation Configuration</div>
+
+  <div class="config-row">
+
+    <div class="card" role="region" aria-label="Traffic environment configuration">
+      <div class="card-header">
+        <div class="card-title"><span class="icon">🚗</span>Traffic Env</div>
+        <span class="card-badge badge-cyan">Gymnasium</span>
+      </div>
+      <div class="config-list" id="envConfig"></div>
+    </div>
+
+    <div class="card" role="region" aria-label="SUMO simulation configuration">
+      <div class="card-header">
+        <div class="card-title"><span class="icon">🛣️</span>SUMO Eval</div>
+        <span class="card-badge badge-blue">TraCI</span>
+      </div>
+      <div class="config-list" id="sumoConfig"></div>
+    </div>
+
+    <div class="card" role="region" aria-label="Intersection phase maps">
+      <div class="card-header">
+        <div class="card-title"><span class="icon">🗺️</span>Intersections</div>
+        <span class="card-badge badge-purple">SUMO Phase Map</span>
+      </div>
+      <div class="config-list" id="sumoIntersections"></div>
+      <div style="margin-top:1rem;padding-top:0.8rem;border-top:1px solid var(--border)">
+        <div style="font-size:0.72rem;color:var(--text-muted);line-height:1.7">
+          <div>Action <strong>0</strong> → NS Green phase</div>
+          <div>Action <strong>1</strong> → EW Green phase</div>
+          <div>Yellow → transition buffer (3s)</div>
+          <div>All-Red → safety gap (2s)</div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /config-row -->
+
+</main><!-- /main -->
+
+
+<!-- ╔══════════════════════════════════════════════════════╗
+     ║  FOOTER                                              ║
+     ╚══════════════════════════════════════════════════════╝ -->
+<footer id="footer">
+  <strong>MARL Traffic Control</strong> &nbsp;·&nbsp;
+  Multi-Agent Q-Learning · SUMO · Gymnasium · Python
+  &nbsp;·&nbsp;
+  Dashboard auto-refreshes every 8 s
+</footer>
+
+<!-- App script -->
+<script src="app.js"></script>
+
+</body>
+</html>

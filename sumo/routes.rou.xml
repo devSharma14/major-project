@@ -1,0 +1,68 @@
+<routes>
+    <vType id="car"
+           accel="2.6"
+           decel="4.5"
+           length="5"
+           maxSpeed="13"
+           sigma="0.5"/>
+
+<!-- Warm-up: reduced rates for initial loading -->
+<flow id="warm_NS"
+      from="N1_J1" to="J3_S1"
+      begin="0" end="400"
+      vehsPerHour="200"
+      departLane="best"
+      departSpeed="max"/>
+
+<flow id="warm_EW"
+      from="W1_J1" to="J2_E1"
+      begin="0" end="400"
+      vehsPerHour="200"
+      departLane="best"
+      departSpeed="max"/>
+
+<!-- NS dominant phase: reduced from 550 to 350 -->
+<flow id="ns_peak"
+      from="N1_J1" to="J3_S1"
+      begin="400" end="1200"
+      vehsPerHour="350"
+      departLane="best"
+      departSpeed="max"/>
+
+<flow id="ns_secondary"
+      from="N2_J2" to="J4_S2"
+      begin="400" end="1200"
+      vehsPerHour="250"
+      departLane="best"
+      departSpeed="max"/>
+
+<flow id="light_EW_during_NS"
+      from="W1_J1" to="J2_E1"
+      begin="400" end="1200"
+      vehsPerHour="180"
+      departLane="best"
+      departSpeed="max"/>
+
+<!-- EW dominant phase: reduced from 550 to 350 -->
+<flow id="ew_peak"
+      from="W1_J1" to="J2_E1"
+      begin="1200" end="2000"
+      vehsPerHour="350"
+      departLane="best"
+      departSpeed="max"/>
+
+<flow id="ew_secondary"
+      from="W2_J3" to="J4_E2"
+      begin="1200" end="2000"
+      vehsPerHour="250"
+      departLane="best"
+      departSpeed="max"/>
+
+<flow id="light_NS_during_EW"
+      from="N1_J1" to="J3_S1"
+      begin="1200" end="2000"
+      vehsPerHour="180"
+      departLane="best"
+      departSpeed="max"/>
+
+</routes>
