@@ -24,16 +24,22 @@ from api.metrics import (
     ENV_CONFIG,
     SUMO_CONFIG,
 )
+from api.sumo_waiting import get_waiting_time
 
 # -------------------------------------------------------
 # Paths
 # -------------------------------------------------------
 ROOT         = os.path.join(os.path.dirname(__file__), "..")
 PLOTS_DIR    = os.path.join(ROOT, "plots")
-FRONTEND_DIR = os.path.join(ROOT, "frontend")
+
+# Serve the built React bundle (frontend/dist) if it exists; fall back to the
+# source index.html for the Vite dev workflow.
+FRONTEND_DIST = os.path.join(ROOT, "frontend", "dist")
+FRONTEND_SRC  = os.path.join(ROOT, "frontend")
+FRONTEND_DIR  = FRONTEND_DIST if os.path.isdir(FRONTEND_DIST) else FRONTEND_SRC
 
 app = Flask(__name__, static_folder=FRONTEND_DIR, static_url_path="")
-CORS(app)  # allow browser to call API from file:// during dev
+CORS(app)  # allow the Vite dev server on :5173 to call /api
 
 
 # -------------------------------------------------------
@@ -81,6 +87,14 @@ def api_config():
         "env_config":  ENV_CONFIG,
         "sumo_config": SUMO_CONFIG,
     })
+
+
+# -------------------------------------------------------
+# API – SUMO per-vehicle waiting time (parsed from tripinfo.xml)
+# -------------------------------------------------------
+@app.route("/api/sumo/waiting-time")
+def api_sumo_waiting():
+    return jsonify(get_waiting_time())
 
 
 # -------------------------------------------------------

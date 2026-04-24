@@ -1,3 +1,4 @@
+import os
 import traci
 import pickle
 
@@ -42,11 +43,13 @@ YELLOW_MAP = {
 def run_sumo_eval(agents, tls_to_agent, sumo_cfg, steps=2000, gui=True):
 
     cmd = ["sumo-gui" if gui else "sumo"]
+    tripinfo_path = os.path.join(os.path.dirname(sumo_cfg) or ".", "tripinfo.xml")
     cmd.extend([
         "-c", sumo_cfg,
         "--start",
         "--delay", "20",
-        "--time-to-teleport", "900"
+        "--time-to-teleport", "900",
+        "--tripinfo-output", tripinfo_path,
     ])
     
     traci.start(cmd)
