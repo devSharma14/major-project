@@ -3,13 +3,15 @@ import traci
 import pickle
 
 # ============================================================
-# CONTROL PARAMETERS (OPTIMIZED FOR REDUCED TELEPORTATIONS)
+# CONTROL PARAMETERS (OPTIMIZED TO REDUCE EXTREME WAIT TIMES)
 # ============================================================
-DECISION_INTERVAL = 5    # Reduced from 10 for faster response
-MIN_GREEN = 10           # Reduced from 15 for faster adaptation
+DECISION_INTERVAL = 3    # Faster response to queue changes
+MIN_GREEN = 8            # Allow faster switching (still safe for clearance)
 YELLOW_TIME = 3
-ALL_RED_TIME = 2
-MAX_RED = 40             # Slightly reduced for better fairness
+ALL_RED_TIME = 1         # Reduce dead time
+MAX_RED = 25             # Force switch earlier to prevent starvation
+MAX_GREEN = 30           # Cap green time to prevent one-sided hogging
+STARVATION_THRESHOLD = 15  # Override agent if red > this AND queue > 0
 
 # ============================================================
 # PHASE MAPS - CORRECTED TO MATCH ACTUAL net.net.xml
@@ -70,6 +72,20 @@ def run_sumo_eval(agents, tls_to_agent, sumo_cfg, steps=2000, gui=True):
     prev_wait = {}
     teleport_count = 0
 
+    # --- Pre-categorize lanes by direction ---
+    ns_lanes = {}
+    ew_lanes = {}
+    for tls in tls_ids:
+        logic = traci.trafficlight.getAllProgramLogics(tls)[0]
+        ns_phase_idx = PHASE_MAP[tls][0]
+        ew_phase_idx = PHASE_MAP[tls][1]
+        ns_state = logic.phases[ns_phase_idx].state.lower()
+        ew_state = logic.phases[ew_phase_idx].state.lower()
+        
+        all_lanes = traci.trafficlight.getControlledLanes(tls)
+        ns_lanes[tls] = list(set(all_lanes[i] for i, c in enumerate(ns_state) if c == 'g'))
+        ew_lanes[tls] = list(set(all_lanes[i] for i, c in enumerate(ew_state) if c == 'g'))
+
     for step in range(steps):
         traci.simulationStep()
         
@@ -112,12 +128,16 @@ def run_sumo_eval(agents, tls_to_agent, sumo_cfg, steps=2000, gui=True):
 
             agent = agents[tls_to_agent[tls]]
 
-            # Get queue for controlled lanes
-            lanes = traci.trafficlight.getControlledLanes(tls)
-            queue = sum(traci.lane.getLastStepHaltingNumber(l) for l in lanes)
+            # Get split queues
+            q_ns = sum(traci.lane.getLastStepHaltingNumber(l) for l in ns_lanes[tls])
+            q_ew = sum(traci.lane.getLastStepHaltingNumber(l) for l in ew_lanes[tls])
 
-            # Build state: (queue_binned, current_action)
-            state = (min(queue, 50), current_action[tls])
+            # Discretize red timer (match traffic_env.py)
+            current_red = red_timer[tls][current_action[tls]]
+            red_bin = min(current_red // 5, 8)
+
+            # Build state: (q_ns, q_ew, action, red_bin)
+            state = (min(q_ns, 50), min(q_ew, 50), current_action[tls], red_bin)
 
             # Get action from agent
             action = agent.select_action(state)
@@ -132,13 +152,37 @@ def run_sumo_eval(agents, tls_to_agent, sumo_cfg, steps=2000, gui=True):
                 else:
                     red_timer[tls][p] += DECISION_INTERVAL
 
-            # FORCE SWITCH IF ONE DIRECTION IS STARVING
+            # --- ADAPTIVE OVERRIDE 1: Starvation safety net ---
+            # If a direction has been red for > STARVATION_THRESHOLD and has
+            # queued vehicles while the green direction is empty, force switch
+            queue_by_action = {0: q_ns, 1: q_ew}
+            for p in [0, 1]:
+                if p != current_action[tls]:  # check the non-green direction
+                    if (red_timer[tls][p] >= STARVATION_THRESHOLD
+                            and queue_by_action[p] > 0
+                            and queue_by_action[current_action[tls]] == 0
+                            and green_timer[tls] >= MIN_GREEN):
+                        action = p
+                        target_phase = PHASE_MAP[tls][p]
+                        red_timer[tls][p] = 0
+                        break
+
+            # --- ADAPTIVE OVERRIDE 2: Hard max-red cap ---
             for p in [0, 1]:
                 if red_timer[tls][p] >= MAX_RED:
                     action = p
                     target_phase = PHASE_MAP[tls][p]
                     red_timer[tls][p] = 0
                     break
+
+            # --- ADAPTIVE OVERRIDE 3: Max green cap ---
+            # Prevent hogging: if green has run for MAX_GREEN, force switch
+            if (green_timer[tls] >= MAX_GREEN
+                    and queue_by_action[1 - current_action[tls]] > 0):
+                other = 1 - current_action[tls]
+                action = other
+                target_phase = PHASE_MAP[tls][other]
+                red_timer[tls][other] = 0
 
             # Only switch if we've met minimum green and need different phase
             if green_timer[tls] >= MIN_GREEN and target_phase != current_sumo_phase:
@@ -183,7 +227,8 @@ if __name__ == "__main__":
         agents,
         tls_to_agent,
         "./sumo/intersection.sumocfg",
-        steps=2000
+        steps=2000,
+        gui=True
     )
 
     print("Evaluation results:", results)

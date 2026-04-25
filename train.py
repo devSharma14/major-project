@@ -4,8 +4,8 @@ import pickle
 if __name__ == "__main__":
     trainer = MARLTrainer(
         n_agents=4,
-        episodes=1000,
-        max_steps=200
+        episodes=3000,
+        max_steps=500
     )
 
     trainer.train()

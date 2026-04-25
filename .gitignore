@@ -1,0 +1,23 @@
+# Node
+node_modules/
+dist/
+
+# Python
+__pycache__/
+*.pyc
+
+# Virtual envs
+venv/
+.venv/
+backend/venv/
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+
+# Data / artifacts
+*.csv
+*.pkl
+*.xml

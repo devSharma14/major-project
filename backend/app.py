@@ -13,8 +13,10 @@ import base64
 from flask import Flask, jsonify, send_from_directory, abort
 from flask_cors import CORS
 
-# Make sure we can import from backend/api/
+# Make sure we can import from backend/api/ and project root (for pickle)
+ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.insert(0, os.path.dirname(__file__))
+sys.path.insert(0, ROOT)
 
 from api.metrics import (
     get_training_metrics,

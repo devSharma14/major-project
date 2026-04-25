@@ -66,6 +66,10 @@ class MARLTrainer:
 
             self.episode_rewards.append(episode_reward)
 
+            # --- Epsilon Decay (Per Episode) ---
+            for i in self.agents:
+                self.agents[i].decay_epsilon()
+
             # --- logging ---
             if ep % 10 == 0:
                 eps = {i: round(a.epsilon, 3) for i, a in self.agents.items()}

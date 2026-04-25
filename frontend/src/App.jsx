@@ -20,7 +20,7 @@ const ENDPOINTS = {
 };
 
 export default function App() {
-  const { data, lastUpdated, refresh } = usePolling(ENDPOINTS, 8000);
+  const { data, lastUpdated, refresh } = usePolling(ENDPOINTS, 4000);
   const [clockTick, setClockTick] = useState(0);
 
   // Re-render "Updated X seconds ago" text every second.
