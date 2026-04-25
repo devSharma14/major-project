@@ -34,18 +34,19 @@ ENV_CONFIG = {
     "arrival_rate_NS": 0.9,
     "arrival_rate_EW": 0.1,
     "pass_rate":       2,
-    "min_green":       5,
-    "max_red":         20,
+    "min_green":       8,
+    "max_red":         25,
     "yellow_time":     2,
 }
 
 # SUMO eval config
 SUMO_CONFIG = {
-    "decision_interval": 5,
-    "min_green":         10,
+    "decision_interval": 3,
+    "min_green":         8,
     "yellow_time":       3,
-    "all_red_time":      2,
-    "max_red":           40,
+    "all_red_time":      1,
+    "max_red":           25,
+    "max_green":         30,
     "eval_steps":        2000,
     "intersections":     ["J1", "J2", "J3", "J4"],
 }

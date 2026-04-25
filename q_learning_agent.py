@@ -37,9 +37,6 @@ class QLearningAgent:
         else:
             action = np.argmax(self.q_table[state])
 
-        # ✅ epsilon decay (THIS WAS MISSING)
-        self.epsilon = max(self.epsilon_min, self.epsilon * self.epsilon_decay)
-
         return action
 
 

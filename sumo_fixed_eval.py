@@ -1,12 +1,15 @@
+import os
 import traci
 
 def run_fixed_gui(sumo_cfg, steps=2000, gui=False):
     cmd = ["sumo-gui" if gui else "sumo"]
+    tripinfo_path = os.path.join(os.path.dirname(sumo_cfg) or ".", "tripinfo_fixed.xml")
     cmd.extend([
         "-c", sumo_cfg,
         "--start",
         "--delay", "20",
-        "--time-to-teleport", "900"
+        "--time-to-teleport", "900",
+        "--tripinfo-output", tripinfo_path
     ])
     
     traci.start(cmd)

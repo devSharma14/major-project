@@ -30,19 +30,19 @@ export default function MetricsRow({ metrics }) {
 
   return (
     <div className="metrics-row" role="region" aria-label="Training statistics">
-      <MetricCard tip="Total training episodes completed"
+      <MetricCard tip=""
         icon="🎬" label="Episodes" sub="Training iterations"
         value={s?.total_episodes} />
-      <MetricCard tip="Best cumulative reward achieved"
+      <MetricCard tip=""
         icon="🏆" label="Best Reward" sub="Highest episode score"
         value={s?.best_reward} />
-      <MetricCard tip="Mean reward over all episodes"
+      <MetricCard tip=""
         icon="📈" label="Mean Reward" sub="All-episode average"
         value={s?.mean_reward} decimals={1} trendEl={trend} />
-      <MetricCard tip="Mean reward over last 50 episodes"
+      <MetricCard tip=""
         icon="🔥" label="Recent Mean" sub="Last 50 episodes"
         value={s?.recent_mean} decimals={1} />
-      <MetricCard tip="Reward at the final training episode"
+      <MetricCard tip=""
         icon="🎯" label="Final Reward" sub="Episode 1000"
         value={s?.final_reward} decimals={1} />
     </div>
